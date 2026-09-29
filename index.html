@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MM2 Key System - Premium</title>
+    <style>
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 15px rgba(138, 43, 226, 0.4); }
+            50% { box-shadow: 0 0 30px rgba(0, 255, 128, 0.6); }
+            100% { box-shadow: 0 0 15px rgba(138, 43, 226, 0.4); }
+        }
+
+        body {
+            background: linear-gradient(-45deg, #0b0b13, #150b24, #0b1a1a, #0b0b13);
+            background-size: 400% 400%;
+            animation: gradientBG 12s ease infinite;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .box {
+            background: rgba(19, 19, 34, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 128, 0.1);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            width: 330px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        h2 {
+            color: #00ff80;
+            margin-bottom: 8px;
+            font-size: 24px;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0,255,128,0.3);
+        }
+
+        p {
+            color: #a0a0c0;
+            font-size: 14px;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .key-container {
+            background: rgba(15, 15, 25, 0.9);
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            word-break: break-all;
+            border: 1px dashed rgba(138, 43, 226, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .key-container:hover {
+            border-color: #00ff80;
+            box-shadow: 0 0 10px rgba(0,255,128,0.2);
+        }
+
+        #keyText {
+            font-family: 'Courier New', monospace;
+            color: #00ff80;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #8a2be2, #b967ff);
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            animation: pulseGlow 3s infinite;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.15);
+            box-shadow: 0 5px 20px rgba(138, 43, 226, 0.6);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button:disabled {
+            background: #4a4a6a;
+            cursor: not-allowed;
+            animation: none;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .toast {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #00ff80;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #6c6c8c;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>MM2 Key System</h2>
+        <p>Completa il processo per ottenere la tua chiave d'accesso valida per 24 ore.</p>
+        
+        <div class="key-container">
+            <span id="keyText">MM2_XXXX-XXXX</span>
+        </div>
+        
+        <button id="genBtn" onclick="generateAndSaveKey()">Genera Chiave</button>
+        <div id="toastMessage" class="toast">Chiave copiata negli appunti!</div>
+        
+        <div class="footer">by andrea_susamongus29</div>
+    </div>
+
+    <script>
+        const BIN_ID = "6abbc730ffd5d160533bb645";
+        const API_KEY = "$2a$10$h/9gLxEbCIQKFN6b3dFxq.k7pyN9k.GuTO5M/qUYGWRj0wa1HHm8";
+
+        function generateAndSaveKey() {
+            const btn = document.getElementById("genBtn");
+            const toast = document.getElementById("toastMessage");
+            
+            btn.innerText = "Generazione...";
+            btn.disabled = true;
+
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let key = "MM2_";
+            for (let i = 0; i < 16; i++) {
+                key += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+
+            const expiryTime = new Date().getTime() + (24 * 60 * 60 * 1000);
+            const dataToSend = {
+                key: key,
+                expiresAt: expiryTime
+            };
+
+            fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': API_KEY
+                },
+                body: JSON.stringify(dataToSend)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("keyText").innerText = key;
+                navigator.clipboard.writeText(key);
+                
+                btn.innerText = "Chiave Pronta!";
+                btn.style.background = "linear-gradient(135deg, #00b060, #00ff80)";
+                btn.style.color = "#000";
+                
+                toast.classList.add("show");
+            })
+            .catch(error => {
+                console.error('Errore:', error);
+                btn.innerText = "Errore, Riprova";
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>
